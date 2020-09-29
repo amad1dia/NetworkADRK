@@ -1,7 +1,11 @@
 package fr.istic.mob.network.networkadrk
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
@@ -11,10 +15,16 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import fr.istic.mob.network.networkadrk.ui.CustomView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnLongClickListener, View.OnTouchListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var mCustomView: CustomView
+    private var createObject = false
+    private var createConnection = false
+    private var updateNetwork = false
+    private val TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,13 +34,10 @@ class MainActivity : AppCompatActivity() {
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
-        val navController = findNavController(R.id.nav_host_fragment)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow), drawerLayout)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+
+        mCustomView = findViewById(R.id.network)
+        mCustomView.setOnLongClickListener(this)
+        mCustomView.setOnTouchListener(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -39,8 +46,46 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.action_create_object -> {
+                createObject = true
+                createConnection = false
+                updateNetwork = false
+            }
+
+            R.id.action_create_connection -> {
+                createConnection = true
+                createObject = false
+                updateNetwork = false
+
+            }
+
+            R.id.action_update -> {
+                updateNetwork = true
+                createConnection = false
+                createObject = false
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onLongClick(v: View?): Boolean {
+        if (createObject) {
+            Log.d(TAG, "onLongClick: ")
+            mCustomView.drawRect()
+        }
+
+
+        return true
+    }
+
+
+    override fun onTouch(v: View?, event: MotionEvent): Boolean {
+        if (createConnection) {
+            mCustomView.connectObject(event)
+        }
+        return super.onTouchEvent(event)
     }
 }

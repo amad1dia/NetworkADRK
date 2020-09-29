@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <SurfaceView
-        android:id="@+id/text_home"
+    <fr.istic.mob.network.networkadrk.ui.CustomView
+        android:id="@+id/network"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
