@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="rect_width">40</integer>
+    <integer name="rect_height">40</integer>
+    <integer name="text_size">20</integer>
+    <integer name="stroke_width">8</integer>
+</resources>

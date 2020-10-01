@@ -1,6 +1,6 @@
 package fr.istic.mob.network.networkadrk.models;
 
-class Graph {
-    var nodes: Set<Node>? = null
-    var connexions: Set<Connection>? = null
-}
+data class Graph (
+    val nodes: MutableSet<Node> = mutableSetOf(),
+    val connexions: MutableSet<Connection> = mutableSetOf()
+)

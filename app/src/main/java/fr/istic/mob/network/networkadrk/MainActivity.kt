@@ -1,25 +1,19 @@
 package fr.istic.mob.network.networkadrk
 
 import android.os.Bundle
-import android.util.Log
+import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.navigation.NavigationView
 import fr.istic.mob.network.networkadrk.ui.CustomView
 
 class MainActivity : AppCompatActivity(), View.OnLongClickListener, View.OnTouchListener {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var mCustomView: CustomView
     private var createObject = false
     private var createConnection = false
@@ -31,9 +25,6 @@ class MainActivity : AppCompatActivity(), View.OnLongClickListener, View.OnTouch
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        val navView: NavigationView = findViewById(R.id.nav_view)
 
         mCustomView = findViewById(R.id.network)
         mCustomView.setOnLongClickListener(this)
@@ -73,19 +64,42 @@ class MainActivity : AppCompatActivity(), View.OnLongClickListener, View.OnTouch
 
     override fun onLongClick(v: View?): Boolean {
         if (createObject) {
-            Log.d(TAG, "onLongClick: ")
-            mCustomView.drawRect()
+            showTextDialog()
         }
-
-
         return true
     }
 
-
     override fun onTouch(v: View?, event: MotionEvent): Boolean {
         if (createConnection) {
-            mCustomView.connectObject(event)
+            mCustomView.connectOrMoveObject(event)
         }
+
+        if (updateNetwork) {
+            mCustomView.connectOrMoveObject(event, true)
+        }
+
         return super.onTouchEvent(event)
+    }
+
+    private fun showTextDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        builder.setMessage(R.string.dialog_message)
+            .setPositiveButton(R.string.ok_button) { dialog, _ ->
+                val objectName = input.text
+
+                mCustomView.drawRect(objectName.toString())
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
+                dialog.cancel()
+            }
+
+        builder.create()
+        builder.show()
     }
 }

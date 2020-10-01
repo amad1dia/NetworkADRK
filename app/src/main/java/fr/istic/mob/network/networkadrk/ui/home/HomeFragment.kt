@@ -2,7 +2,6 @@ package fr.istic.mob.network.networkadrk.ui.home
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -11,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import fr.istic.mob.network.networkadrk.R
 import fr.istic.mob.network.networkadrk.ui.CustomView
-import kotlin.random.Random
 
 class HomeFragment : Fragment(), View.OnLongClickListener, View.OnTouchListener {
 
@@ -45,12 +43,12 @@ class HomeFragment : Fragment(), View.OnLongClickListener, View.OnTouchListener 
 
 
     override fun onLongClick(v: View?): Boolean {
-        mCustomView.drawRect()
+//        mCustomView.drawRect()
         return true
     }
 
     override fun onTouch(v: View?, event: MotionEvent): Boolean {
-        mCustomView.connectObject(event)
+        mCustomView.connectOrMoveObject(event)
         return false
     }
 }
