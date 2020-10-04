@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_label">Network Amadou Romaric</string>
     <string name="app_name">NetworkADRK</string>
     <string name="action_create_object">Create object</string>
     <string name="action_create_connection">Create connection</string>
