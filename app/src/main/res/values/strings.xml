@@ -1,18 +1,20 @@
 <resources>
-    <string name="app_name">Réseau Amadou Romaric</string>
+    <string name="app_name">NetworkADRK</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_create_object">Créer un objet</string>
-    <string name="action_create_connection">Créer une connexion</string>
-    <string name="action_update">Mise à jour de connection / objet</string>
+    <string name="reinitialize_network">Réinitialiser le réseau</string>
+    <string name="action_create_object">Ajout d\'objet</string>
+    <string name="action_create_connection">Ajout de connexion</string>
+    <string name="action_update">Modification d\'objets / connexions</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
     <string name="cancel">Annuler</string>
     <string name="dialog_message">Entrez le nom de l\'objet</string>
     <string name="ok_button">Valider</string>
+    <string name="network_reinitialization">Voulez-vous réinitialiser le réseau ?</string>
+    <string name="yes_button">Oui</string>
+    <string name="no_button">Non</string>
+    <string name="toast_empty_network">Ce réseau est vide, il n\'y a rien à réinitialiser !</string>
 </resources>

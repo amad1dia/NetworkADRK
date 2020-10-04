@@ -6,6 +6,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import fr.istic.mob.network.networkadrk.R
 import fr.istic.mob.network.networkadrk.models.Connection
@@ -80,7 +82,7 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
     }
 
 
-    public fun drawRect(objectName: String) {
+    fun drawRect(objectName: String) {
         val rect = RectF(xAbs, yAbs, xAbs + rectWidth, yAbs + rectHeight)
 
         nodes.add(
@@ -110,14 +112,12 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         }
 
 //        canvas.drawBitmap(extraBitmap, 0f, 0f, pBg)
-        //Show line
-
+        //Show line while drawing
         canvas.drawPath(path, pBg)
         invalidate()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        Log.d(TAG, "onTouchEvent: ")
         xAbs = event.x
         yAbs = event.y
 
@@ -199,6 +199,13 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
     }
 
 
+    fun reinitializeNetwork() {
+        if (nodes.isNotEmpty() || connections.isNotEmpty())
+            showConfirmDialog()
+        else
+            Toast.makeText(context, context.getString(R.string.toast_empty_network), Toast.LENGTH_SHORT).show()
+    }
+
     private fun getNodeByPosition(x: Float, y: Float): Node? {
         nodes.forEach {
             if (it.objet.contains(x, y))
@@ -206,5 +213,22 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         }
 
         return null
+    }
+
+    private fun showConfirmDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+
+        builder.setMessage(R.string.network_reinitialization)
+            .setPositiveButton(R.string.yes_button) { dialog, _ ->
+                nodes.clear()
+                connections.clear()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.no_button) { dialog, _ ->
+                dialog.cancel()
+            }
+
+        builder.create()
+        builder.show()
     }
 }
