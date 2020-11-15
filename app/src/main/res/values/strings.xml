@@ -1,11 +1,6 @@
 <resources>
     <string name="app_name">NetworkADRK</string>
     <string name="app_label">Network Amadou Romaric</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
     <string name="reinitialize_network">Réinitialiser le réseau</string>
     <string name="action_create_object">Ajout d\'objet</string>
     <string name="action_create_connection">Ajout de connexion</string>
@@ -18,4 +13,17 @@
     <string name="yes_button">Oui</string>
     <string name="no_button">Non</string>
     <string name="toast_empty_network">Ce réseau est vide, il n\'y a rien à réinitialiser !</string>
+    <string name="save_network">Sauvegarder le réseau</string>
+    <string name="import_plans">Importer d\'autres plans</string>
+    <string name="send_network_by_mail">Envoie du réseau par mail</string>
+    <string name="show_save_network">Afficher le réseau enregistré</string>
+    <string name="connection_label">Entrez l\'étiquette de la connexion</string>
+    <string name="delete_object">Supprimer l\'objet</string>
+    <string name="update_object">Modifier les paramètres de l\'objet</string>
+    <string name="graph_created">Le graphe a été enregistrée avec succès</string>
+    <string name="graph_name">Saisir le nom du graphe</string>
+    <string name="update_object_color">Modifier la couleur de l\'objet</string>
+    <string name="update_object_label">Modifier l\'étiquette de l\'objet</string>
+    <string name="pick_color">Choisir la couleur du label</string>
+    <string name="action_update_properties">Modifier les propriétés de l\'objet</string>
 </resources>

@@ -2,23 +2,23 @@ package fr.istic.mob.network.networkadrk.ui
 
 import android.content.Context
 import android.graphics.*
+import android.text.InputType
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.FragmentManager
 import fr.istic.mob.network.networkadrk.R
-import fr.istic.mob.network.networkadrk.models.Connection
-import fr.istic.mob.network.networkadrk.models.Node
-import fr.istic.mob.network.networkadrk.models.Position
+import fr.istic.mob.network.networkadrk.models.*
+import java.io.*
 
 
 // Stroke width for the the paint.
 private const val STROKE_WIDTH = 12f
 
-@Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
 class CustomView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
 
@@ -34,8 +34,7 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
     private val connectionStrokeWidth = resources.getInteger(R.integer.stroke_width)
 
     companion object {
-        var nodes: MutableList<Node> = mutableListOf()
-        var connections: MutableList<Connection> = mutableListOf()
+        var graph = Graph()
     }
 
     private val drawColor = ResourcesCompat.getColor(context.resources, R.color.colorPrimary, null)
@@ -48,6 +47,15 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
     private var firstObject: Node? = null
     private var secondObject: Node? = null
     private var objectToMove: Node? = null
+    private var colors: Map<Int, Int> = mapOf(
+        0 to Color.RED,
+        1 to Color.GREEN,
+        2 to Color.BLUE,
+        3 to Color.rgb(255, 165, 0), //orange
+        4 to Color.CYAN,
+        5 to Color.MAGENTA,
+        6 to Color.BLACK
+    )
 
     // Set up the paint with which to draw.
     private val paint = Paint().apply {
@@ -68,11 +76,16 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         style = Paint.Style.STROKE
     }
 
-    private val textPaint = Paint().apply {
+    private val objectPaint = Paint().apply {
         color = drawColor
         textSize = labelSize.toFloat()
         style = Paint.Style.FILL
+    }
 
+    private val connectionPaint = Paint().apply {
+        color = drawColor
+        textSize = labelSize.toFloat()
+        style = Paint.Style.FILL
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -83,35 +96,52 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
 
 
     fun drawRect(objectName: String) {
-        val rect = RectF(xAbs, yAbs, xAbs + rectWidth, yAbs + rectHeight)
-
-        nodes.add(
+        val objectR = RectObject(xAbs, yAbs, xAbs + rectWidth, yAbs + rectHeight)
+        graph.nodes.add(
             Node(
                 label = objectName,
-                objet = rect,
+                objet = objectR,
                 position = Position(xAbs, yAbs)
             )
         )
     }
 
+    private fun getRectFromObject(objectR: RectObject) =
+        RectF(objectR.left, objectR.top, objectR.right, objectR.bottom)
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        nodes.forEach {
-            canvas.drawRect(it.objet, paint)
-            canvas.drawText(it.label, it.objet.right + 10, it.objet.centerY(), textPaint)
+        graph.nodes.forEach {
+            val rect = getRectFromObject(it.objet)
+            paint.color = it.color
+            objectPaint.color = it.color
+
+            canvas.drawRect(rect, paint)
+            canvas.drawText(it.label, it.objet.right + 10, rect.centerY(), objectPaint)
         }
 
-        connections.forEach {
+        graph.connections.forEach {
+            val rect1 = getRectFromObject(it.node1?.objet!!)
+            val rect2 = getRectFromObject(it.node2?.objet!!)
+            val connectionCenterX = (rect1.centerX() + rect2.centerX()) / 2
+            val connectionCenterY = (rect1.centerY() + rect2.centerY()) / 2
+
             canvas.drawLine(
-                it.node1?.objet!!.centerX(),
-                it.node1.objet!!.centerY(),
-                it.node2?.objet!!.centerX(),
-                it.node2.objet!!.centerY(),
+                rect1.centerX(),
+                rect1.centerY(),
+                rect2.centerX(),
+                rect2.centerY(),
                 pBg
+            )
+
+            canvas.drawText(
+                it.label,
+                connectionCenterX - (it.label.length / 2),
+                connectionCenterY - (it.label.length / 2),
+                connectionPaint
             )
         }
 
-//        canvas.drawBitmap(extraBitmap, 0f, 0f, pBg)
         //Show line while drawing
         canvas.drawPath(path, pBg)
         invalidate()
@@ -158,22 +188,19 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         } else {
             secondObject = getNodeByPosition(motionTouchEventX, motionTouchEventY)
             path.lineTo(motionTouchEventX, motionTouchEventY)
-            if (firstObject != null && secondObject != null) {
+            if (firstObject != null && secondObject != null && firstObject != secondObject) {
+
+                val rect1 = getRectFromObject(firstObject!!.objet)
+                val rect2 = getRectFromObject(secondObject!!.objet)
                 extraCanvas.drawLine(
-                    firstObject!!.objet.centerX(),
-                    firstObject!!.objet.centerY(),
-                    secondObject!!.objet.centerX(),
-                    secondObject!!.objet.centerY(),
+                    rect1.centerX(),
+                    rect1.centerY(),
+                    rect2.centerX(),
+                    rect2.centerY(),
                     pBg
                 )
 
-                connections.add(
-                    Connection(
-                        Color.GREEN,
-                        firstObject,
-                        secondObject
-                    )
-                )
+                showInputDialog()
             }
         }
         path.reset()
@@ -184,7 +211,8 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         objectToMove?.objet?.top = motionTouchEventY
         objectToMove?.objet?.right = motionTouchEventX + rectWidth
         objectToMove?.objet?.bottom = motionTouchEventY + rectHeight
-
+        objectToMove?.position?.x = motionTouchEventX
+        objectToMove?.position?.y = motionTouchEventY
     }
 
     fun connectOrMoveObject(event: MotionEvent, move: Boolean = false) {
@@ -198,17 +226,38 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         }
     }
 
+    fun updateObject(fragmentManager: FragmentManager, event: MotionEvent) {
+        motionTouchEventX = event.x
+        motionTouchEventY = event.y
+        val currentObject = getNodeByPosition(motionTouchEventX, motionTouchEventY)
+        if (currentObject != null)
+            showPopup(fragmentManager)
+    }
+
+    private fun showPopup(fragmentManager: FragmentManager) {
+        val addPhotoBottomDialogFragment = ActionBottomDialogFragment.newInstance()
+        addPhotoBottomDialogFragment.show(
+            fragmentManager,
+            ActionBottomDialogFragment.TAG
+        )
+    }
 
     fun reinitializeNetwork() {
-        if (nodes.isNotEmpty() || connections.isNotEmpty())
+        if (graph.nodes.isNotEmpty() || graph.connections.isNotEmpty())
             showConfirmDialog()
         else
-            Toast.makeText(context, context.getString(R.string.toast_empty_network), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.toast_empty_network),
+                Toast.LENGTH_SHORT
+            ).show()
     }
 
     private fun getNodeByPosition(x: Float, y: Float): Node? {
-        nodes.forEach {
-            if (it.objet.contains(x, y))
+        graph.nodes.forEach {
+            val rect = getRectFromObject(it.objet)
+
+            if (rect.contains(x, y))
                 return it
         }
 
@@ -220,8 +269,8 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
 
         builder.setMessage(R.string.network_reinitialization)
             .setPositiveButton(R.string.yes_button) { dialog, _ ->
-                nodes.clear()
-                connections.clear()
+                graph.nodes.clear()
+                graph.connections.clear()
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.no_button) { dialog, _ ->
@@ -231,4 +280,187 @@ class CustomView(context: Context, attributeSet: AttributeSet) : View(context, a
         builder.create()
         builder.show()
     }
+
+    private fun showInputDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+
+        val input = EditText(context)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        builder.setMessage(R.string.connection_label)
+            .setPositiveButton(R.string.ok_button) { dialog, _ ->
+                val connectionLabel = input.text.toString()
+
+                graph.connections.add(
+                    Connection(
+                        label = connectionLabel,
+                        Color.GREEN,
+                        firstObject,
+                        secondObject
+                    )
+                )
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
+                dialog.cancel()
+            }
+
+        builder.create()
+        builder.show()
+    }
+
+    private fun saveObject(graphName: String) {
+        try {
+            val fos = context.openFileOutput("$graphName.tmp", Context.MODE_PRIVATE)
+            val oos = ObjectOutputStream(fos)
+            oos.writeObject(graph)
+            fos.close()
+        } catch (ex: FileNotFoundException) {
+            ex.printStackTrace()
+        }
+
+        Toast.makeText(context, context.getString(R.string.graph_created), Toast.LENGTH_SHORT)
+            .show()
+    }
+
+    private fun showSavedNetwork(graphName: String) {
+        var inputStream: InputStream? = null
+        try {
+            inputStream = context.openFileInput("$graphName.tmp")
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        }
+        if (inputStream == null) {
+            Toast.makeText(context, "Ce graphe n'existe pas", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val ois = ObjectInputStream(inputStream)
+            try {
+                graph = ois.readObject() as Graph
+            } catch (e: ClassNotFoundException) {
+                e.printStackTrace()
+            }
+        } catch (e: StreamCorruptedException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun showOrSaveGraphDialog(action: String) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+
+        val input = EditText(context)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        builder.setMessage(R.string.graph_name)
+            .setPositiveButton(R.string.ok_button) { dialog, _ ->
+                val graphName = input.text.toString()
+                if (graphName.isEmpty()) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.graph_name),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@setPositiveButton
+                }
+                if (action == "save")
+                    saveObject(graphName)
+                else if (action == "show")
+                    showSavedNetwork(graphName)
+
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
+                dialog.cancel()
+            }
+
+        builder.create()
+        builder.show()
+    }
+
+    fun deleteObject() {
+        val currentObject = getNodeByPosition(motionTouchEventX, motionTouchEventY)
+        if (currentObject != null) {
+            graph.nodes.remove(currentObject)
+            removeLinkedConnections(currentObject)
+        }
+    }
+
+    private fun removeLinkedConnections(currentObject: Node) {
+        val connections: MutableList<Connection> = mutableListOf()
+        graph.connections.forEach {
+            if (it.node1 == currentObject || it.node2 == currentObject)
+                connections.add(it)
+        }
+
+        //La suppression de la connexion dans le premier foreach créé l'exception
+        // java.util.ConcurrentModificationException
+        connections.forEach {
+            graph.connections.remove(it)
+        }
+    }
+
+    fun changeLabel() {
+        val currentObject = getNodeByPosition(motionTouchEventX, motionTouchEventY)
+
+        if (currentObject != null) {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+
+            val input = EditText(context)
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            input.setText(currentObject.label)
+            builder.setView(input)
+
+            builder.setMessage(R.string.dialog_message)
+                .setPositiveButton(R.string.ok_button) { dialog, _ ->
+                    val objectLabel = input.text.toString()
+                    if (objectLabel.isEmpty()) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.graph_name),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        return@setPositiveButton
+                    }
+
+                    currentObject.label = objectLabel
+
+                    dialog.dismiss()
+                }
+                .setNegativeButton(R.string.cancel) { dialog, _ ->
+                    dialog.cancel()
+                }
+
+            builder.create()
+            builder.show()
+        }
+    }
+
+    fun changeObjectColor() {
+        val currentObject = getNodeByPosition(motionTouchEventX, motionTouchEventY)
+
+        if (currentObject != null) {
+            val builder = AlertDialog.Builder(context)
+
+            builder.setTitle(R.string.pick_color)
+                .setItems(
+                    R.array.colors
+                ) { dialog, which ->
+                    val color = colors[which]
+                    if (color != null)
+                        currentObject.color = color
+
+                    dialog.dismiss()
+                }
+            builder.create()
+            builder.show()
+        }
+    }
+
 }

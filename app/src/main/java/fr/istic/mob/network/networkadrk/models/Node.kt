@@ -1,11 +1,12 @@
 package fr.istic.mob.network.networkadrk.models
 
-import android.graphics.*
-import android.graphics.drawable.Drawable
+import android.graphics.Color
+import android.graphics.RectF
+import java.io.Serializable
 
 data class Node (
-    val label: String,
-    val color: Int? = Color.BLUE,
+    var label: String,
+    var color: Int = Color.BLUE,
     val position: Position,
-    val objet: RectF
-)
+    val objet: RectObject
+): Serializable

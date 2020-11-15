@@ -13,4 +13,17 @@
     <string name="yes_button">Yes</string>
     <string name="no_button">No</string>
     <string name="toast_empty_network">The network is empty, there is nothing to reinitialize !</string>
+    <string name="save_network">Save the network</string>
+    <string name="import_plans">Importing other plans</string>
+    <string name="send_network_by_mail">Sending network by mail</string>
+    <string name="show_save_network">Show saved network</string>
+    <string name="connection_label">Enter connection label</string>
+    <string name="delete_object">Delete object</string>
+    <string name="update_object">Update object properties</string>
+    <string name="graph_created">The graph is saved successfully</string>
+    <string name="graph_name">Enter the graph name</string>
+    <string name="update_object_color">Update object color</string>
+    <string name="update_object_label">Update object label</string>
+    <string name="pick_color">Pick a color</string>
+    <string name="action_update_properties">Update object properties</string>
 </resources>

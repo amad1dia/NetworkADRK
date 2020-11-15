@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/app_bar_main"
-    android:background="@drawable/plan">
+    tools:showIn="@layout/app_bar_main">
 
     <fr.istic.mob.network.networkadrk.ui.CustomView
         android:id="@+id/network"
@@ -15,7 +14,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/plan"
+        app:layout_constraintTop_toTopOf="parent">
+    </fr.istic.mob.network.networkadrk.ui.CustomView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
